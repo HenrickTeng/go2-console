@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Go2 建图与导航控制台</title>
+  <link rel="stylesheet" href="/app.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="logo">Go2</span>
+      <div>
+        <strong>建图与导航控制台</strong>
+        <small>只在本机打开 · 不接入教学平台</small>
+      </div>
+    </div>
+    <nav>
+      <button type="button" data-tab="mapping" class="active">在线建图</button>
+      <button type="button" data-tab="annotate">语义标注</button>
+      <button type="button" data-tab="nav">自主导航</button>
+      <button type="button" data-tab="mission">任务编排</button>
+    </nav>
+    <div class="safety">
+      <button type="button" id="estop" class="danger">急停</button>
+      <button type="button" id="clear-estop" class="ghost">恢复</button>
+    </div>
+  </header>
+  <main>
+    <section class="card">
+      <div class="map-wrap">
+        <canvas id="map" width="800" height="560"></canvas>
+        <canvas id="cloud" width="800" height="560"></canvas>
+        <div class="zoombar">
+          <button type="button" id="zoom-in" title="放大">+</button>
+          <button type="button" id="zoom-out" title="缩小">−</button>
+          <button type="button" id="zoom-reset" class="ghost" title="回到整张图">整图</button>
+        </div>
+      </div>
+      <p id="map-status" class="status">正在连接控制台…</p>
+    </section>
+    <section>
+      <section id="panel-mapping" class="panel">
+        <h2>在线建图</h2>
+        <p class="hint">建图时这里是三维激光点云，按住拖动旋转，滚轮拉远拉近。松键即停。速度不要超过 0.3 m/s。画区域和导航仍用俯视地图。</p>
+        <div class="row">
+          <button type="button" id="arm-teleop">开始遥控</button>
+          <button type="button" id="disarm-teleop" class="ghost">结束遥控</button>
+          <button type="button" id="save-map">保存地图</button>
+        </div>
+        <label>速度 <span id="speed-label">0.20</span> m/s</label>
+        <input id="speed" type="range" min="0.08" max="0.30" step="0.02" value="0.20" />
+        <div class="keys" id="pad" tabindex="0">
+          <kbd data-key="q">Q</kbd><kbd data-key="w">W</kbd><kbd data-key="e">E</kbd>
+          <kbd data-key="a">A</kbd><kbd data-key="s">S</kbd><kbd data-key="d">D</kbd>
+        </div>
+        <p class="hint">Q 左转，W 前进，E 右转，A 左移，S 后退，D 右移。先点「开始遥控」，再点这组按键。</p>
+      </section>
+      <section id="panel-annotate" class="panel hidden">
+        <h2>语义标注</h2>
+        <p class="hint">在地图上依次点击围出区域，闭合后命名。滚轮缩放，右键拖动平移。地点给导航和任务用。禁行区（玻璃、楼梯、桌脚）规划时会绕开。</p>
+        <div class="row">
+          <button type="button" id="close-poly">闭合</button>
+          <button type="button" id="undo-pt" class="ghost">撤销一点</button>
+        </div>
+        <label>名称</label>
+        <input id="place-name" placeholder="饭堂、教室" />
+        <label>类型</label>
+        <select id="place-kind">
+          <option value="place">地点</option>
+          <option value="keepout">禁行区</option>
+        </select>
+        <div class="row">
+          <button type="button" id="add-place">保存这个区域</button>
+        </div>
+        <ul id="place-list" class="places"></ul>
+        <button type="button" id="save-places" class="ghost">写入标注文件</button>
+      </section>
+      <section id="panel-nav" class="panel hidden">
+        <h2>自主导航</h2>
+        <p class="hint">在地图上点一个可走的位置，或选择已经命名的地点。先看规划出的路径，再点开始，狗才会走。人要在旁边，遥控器拿在手里。</p>
+        <label>地点</label>
+        <select id="nav-place"><option value="">用地图上点的位置</option></select>
+        <div class="row">
+          <button type="button" id="preview-path">只规划</button>
+          <button type="button" id="start-nav">开始前往</button>
+          <button type="button" id="stop-nav" class="ghost">停止</button>
+        </div>
+        <p id="nav-status" class="status"></p>
+      </section>
+      <section id="panel-mission" class="panel hidden">
+        <h2>任务编排</h2>
+        <p class="hint">用已经命名的地点写一句话。例如：先去饭堂，等人，再去教室。狗走到饭堂后停下，等你点继续或写一句确认，再去下一处。</p>
+        <textarea id="mission-text">先去饭堂，等人，再去教室</textarea>
+        <div class="row">
+          <button type="button" id="start-mission">开始任务</button>
+          <button type="button" id="continue-mission">继续</button>
+          <button type="button" id="stop-mission" class="ghost">停止</button>
+        </div>
+        <label>到点后的确认</label>
+        <input id="mission-note" placeholder="饭已经放上" />
+        <p id="mission-status" class="status"></p>
+        <div id="mission-log" class="log"></div>
+      </section>
+    </section>
+  </main>
+  <footer>
+    课堂里还可以接着做：把玻璃标成禁行区、多地点巡逻、到点播报。这一页的「任务编排」就是按地点顺序执行，中间留一次人工或语音确认。
+  </footer>
+  <script src="/app.js"></script>
+</body>
+</html>

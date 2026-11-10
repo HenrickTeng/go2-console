@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+data/console.log
+data/console.pid
+data/map/
+data/semantic.json
+data/_roundtrip/
